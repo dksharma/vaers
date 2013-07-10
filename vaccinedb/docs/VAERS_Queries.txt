@@ -1,0 +1,59 @@
+#=================================================
+# Analytical SQL Queries for Vaccine DB.
+# July 10th 2013
+# Author: Deepak Sharma
+# Note:  there are some queries which are also used
+# in the java program to extract out selected 
+# records for ROTHB5 vaccine - as an example. 
+#=================================================
+
+#=================================================
+# This query just shows how many records in the tables
+#=================================================
+
+select concat('Vaccines= ', (select count(distinct vaccine.`VAERS_ID`) from vaccine)) as vax, 
+       concat('Symptoms= ',(select count(distinct symptoms.`VAERS_ID`, symptoms.`SYMPTOM1`) from symptoms)) as sympt, 
+       concat('Data= ',(select count(distinct vaersdata.`VAERS_ID`, vaersdata.`RECVDATE`) from vaersdata)) as data ;
+
+#=================================================
+# Query for Cui, also used in the Java Program.
+#=================================================
+
+select vc.*,
+sy.`SYMPTOM1`,
+sy.`SYMPTOM2`,
+sy.`SYMPTOM3`,
+sy.`SYMPTOM4`,
+sy.`SYMPTOM5`,
+vd.`SYMPTOM_TEXT`,
+vd.`ONSET_DATE`,
+vd.`SEX`,
+vd.`DISABLE`,
+vd.died,
+vd.`DATEDIED`,
+vd.`AGE_YRS`,
+vd.`HOSPDAYS`,
+vd.`L_THREAT`,
+vd.`NUMDAYS`,
+vd.`RPT_DATE`,
+vd.`X_STAY`
+from vaccine vc, symptoms sy, vaersdata vd
+where 
+(vc.VAX_TYPE = 'ROTHB5'
+or vc.`VAX_TYPE` = 'RV')
+AND
+(sy.`SYMPTOM1` like '%intussusception%'
+or
+sy.`SYMPTOM2` like '%intussusception%'
+or
+sy.`SYMPTOM3` like '%intussusception%'
+or
+sy.`SYMPTOM4` like '%intussusception%'
+or
+sy.`SYMPTOM5` like '%intussusception%')
+AND
+vc.`VAERS_ID` = sy.`VAERS_ID`
+AND
+vd.`VAERS_ID` = vc.`VAERS_ID`
+order by vd.`RECVDATE`;
+
